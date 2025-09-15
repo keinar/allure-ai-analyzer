@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: allure-ai-analyzer
-Version: 1.0.3
+Version: 1.0.6
 Summary: An intelligent CLI tool that transforms raw Allure test results into an interactive dashboard with an AI analyst.
 Author-email: Keinar Elkayam <info@digital-solution.co.il>
 Project-URL: Homepage, https://github.com/keinar/allure-ai-analyzer
@@ -10,10 +10,10 @@ Classifier: Operating System :: OS Independent
 Requires-Python: >=3.11
 Description-Content-Type: text/markdown
 License-File: LICENSE
-Requires-Dist: PyYAML
-Requires-Dist: Flask
-Requires-Dist: python-dotenv
-Requires-Dist: google-genai
+Requires-Dist: PyYAML>=6.0
+Requires-Dist: Flask>=3.0
+Requires-Dist: python-dotenv>=1.0
+Requires-Dist: google-genai>=0.3
 Dynamic: license-file
 
 # Allure AI Failure Analyzer
@@ -27,9 +27,13 @@ Dynamic: license-file
 - [Features](#features)
 - [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
-- [Installation & Setup](#installation--setup)
+- [Installation](#installation)
+- [Quickstart](#quickstart)
 - [Configuration](#configuration)
 - [Usage](#usage)
+- [Troubleshooting](#troubleshooting)
+- [Local Development](#local-development)
+- [Publishing (Maintainers)](#publishing-maintainers)
 - [How It Works](#how-it-works)
 - [Using the AI Analyst](#using-the-ai-analyst)
 - [License](#license)
@@ -82,71 +86,88 @@ allure-analyzer/
 ├── pyproject.toml
 ├── README.md
 └── requirements.txt
-````
+```
+
+> If you ship package data (templates, static assets, YAML config), make sure they live **under** `src/allure_analyzer/...` so they are included in wheels.
 
 -----
 
 ## Prerequisites
 
-  - **Python 3.11+**
-  - **pip** (Python package manager)
-  - An **Allure results** directory generated from a test run.
+- **Python 3.11+** (the package requires `>=3.11`)
+- **pip** (Python package manager)
+- An **Allure results** directory generated from a test run.
+
+> macOS tip (Homebrew): `brew install python@3.11`
 
 -----
 
-## Installation & Setup
+## Installation
 
-1.  **Clone the Repository (for development):**
+### Stable (PyPI)
+Once released to PyPI (production), installation is simply:
+```bash
+pip install allure-ai-analyzer
+```
 
-    ```bash
-    git clone <your-repository-url>
-    cd allure-analyzer
-    ```
+### Preview / Testing (TestPyPI)
+When installing from **TestPyPI**, use PyPI as a **fallback for dependencies** (so wheels like `PyYAML>=6.0` are available):
+```bash
+pip install --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple \
+  allure-ai-analyzer
+```
 
-2.  **Create and Activate a Virtual Environment:**
-    Ensure you are using Python 3.11 or newer.
+> Why the extra index? TestPyPI often doesn’t host all dependency wheels. The extra index lets pip fetch deps from PyPI while your package still comes from TestPyPI.
 
-    ```bash
-    python3.11 -m venv .venv
-    source .venv/bin/activate
-    ```
+-----
 
-    *For Windows, use `.venv\Scripts\activate`*
+## Quickstart
 
-3.  **Install for Development:**
-    This command installs the package in "editable" mode.
+1) **Set up a virtual environment (recommended):**
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+```
 
-    ```bash
-    pip install -e .
-    ```
+2) **Install the CLI:**
+```bash
+pip install allure-ai-analyzer
+# or, from TestPyPI with fallback:
+# pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple allure-ai-analyzer
+```
 
-    For final distribution, you will build and upload the package to PyPI.
+3) **Provide your API key:**
+Create a `.env` file in your **automation project root** (where you run the CLI) and add:
+```bash
+GEMINI_API_KEY="your-api-key-here"
+```
 
-4.  **Set Up Your API Key:**
+4) **Generate a report:**
+From your automation project (where `allure-results` exists):
+```bash
+allure-analyze generate
+```
 
-      - Create a new file named `.env` in the project root where you will run the commands.
-      - Copy the content from `.env.example`.
-      - Replace the placeholder with your actual Gemini API key from Google AI Studio.
-
-    <!-- end list -->
-
-    ```
-    GEMINI_API_KEY="your-api-key-here"
-    ```
+5) **View the interactive dashboard + AI analyst:**
+```bash
+allure-analyze view
+```
+By default the server binds to `http://127.0.0.1:8000` (or the port you pass via `--port`).
 
 -----
 
 ## Configuration
 
-The tool comes with a default configuration. You can override it by creating a file named `allure-analyzer-config.yaml` in your automation project's root directory.
+You can override defaults by creating `allure-analyzer-config.yaml` in your **automation project root** (next to your `allure-results`).
 
-The default settings are in `src/allure_analyzer/config/default_config.yaml`:
+The default settings live at `src/allure_analyzer/config/default_config.yaml`:
 
 ```yaml
 # Number of top failure groups to include in the report. -1 means all groups.
 top_n_groups_to_report: -1
 
-# By default, include tests with 'broken' status in the analysis.
+# Include tests with 'broken' status in the analysis.
 include_broken: true
 
 # --- UI Behavior ---
@@ -154,7 +175,7 @@ include_broken: true
 proactive_summary_on_load: true
 ```
 
-All of these can also be controlled via CLI flags.
+Most options can also be controlled via CLI flags (see below).
 
 -----
 
@@ -162,79 +183,134 @@ All of these can also be controlled via CLI flags.
 
 Once installed, the `allure-analyze` command is available in your terminal.
 
-**1. Generate a Report:**
-Navigate to your automation project's root directory (where `allure-results` is located) and run:
-
+### 1) Generate a Report
+Run from your automation project's root (where `allure-results` is located):
 ```bash
 allure-analyze generate
 ```
 
-This will analyze the results and save the report data to a central folder in your user's home directory (`~/.allure-analyzer/`).
+**Useful flags:**
+- `--path /path/to/results` — explicit path to `allure-results`
+- `--config /path/to/config.yaml` — use a custom config
+- `--top-n 10` — only report the top 10 failure groups
+- `--exclude-broken` — exclude 'broken' tests from analysis
 
-**Command Options:**
-
-  - `--path /path/to/results`: Specify a custom path to the `allure-results` directory.
-  - `--config /path/to/config.yaml`: Use a custom configuration file.
-  - `--top-n 10`: Only report the top 10 failure groups.
-  - `--exclude-broken`: Exclude 'broken' tests from the analysis.
-
-**2. View the Reports:**
-To launch the interactive dashboard and AI analyst, run:
-
+### 2) View Reports (Dashboard + AI)
 ```bash
 allure-analyze view
 ```
+**Useful flags:**
+- `--port 8001` — run the server on a different port
+- `--no-proactive-summary` — disable the automatic executive summary
 
-**Command Options:**
-
-  - `--port 8001`: Run the server on a different port.
-  - `--no-proactive-summary`: Disable the automatic executive summary for this session.
-
-**Integration with Node.js Projects:**
-Since it's a CLI tool, you can easily add it to your `package.json` scripts:
-
+### Integration with Node.js Projects
+Because this is a CLI, you can wire it into `package.json`:
 ```json
-"scripts": {
-  "test": "playwright test",
-  "posttest": "allure-analyze generate",
-  "report": "allure-analyze view"
+{
+  "scripts": {
+    "test": "playwright test",
+    "posttest": "allure-analyze generate",
+    "report": "allure-analyze view"
+  }
 }
 ```
 
-Now you can run `npm test` and it will automatically generate the analysis report afterward.
+-----
+
+## Troubleshooting
+
+- **`zsh: command not found: allure-analyze`**
+  - Ensure the venv is **activated** and installation succeeded: `pip show allure-ai-analyzer`.
+  - On Windows PowerShell, activate via: `.venv\Scripts\Activate.ps1`.
+
+- **`ERROR: No matching distribution found`**
+  - Check Python version: `python -V` must be **3.11+**.
+  - If installing from **TestPyPI**, add the fallback index:  
+    `--extra-index-url https://pypi.org/simple`.
+
+- **Build isolation failures like `setuptools>=40.8.0` when installing from TestPyPI**
+  - Use the recommended TestPyPI install command above so dependencies come from PyPI.
+  - Alternatively, preinstall critical deps: `pip install PyYAML>=6.0`.
+
+- **Assets not found (templates/static/config)**
+  - Ensure they live under `src/allure_analyzer/...` and are included via `package-data`.
+
+-----
+
+## Local Development
+
+1) Clone and enter the repo:
+```bash
+git clone <your-repository-url>
+cd allure-analyzer
+```
+
+2) Create & activate a venv:
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+```
+
+3) Install in editable mode:
+```bash
+pip install -e .
+```
+
+4) Set your `.env` (see Quickstart), then run:
+```bash
+allure-analyze generate
+allure-analyze view
+```
+
+-----
+
+## Publishing (Maintainers)
+
+> Use [TestPyPI](https://test.pypi.org) for dry runs and **PyPI** for production.
+
+```bash
+# Clean, build, and upload
+rm -rf dist build *.egg-info
+python -m pip install -U pip build twine
+python -m build
+python -m twine upload --repository testpypi dist/*
+# For PyPI production:
+# python -m twine upload dist/*
+```
+
+**Common upload issues**
+- *"File already exists"*: bump the version in `pyproject.toml`.
+- README rendering warnings: ensure `readme = "README.md"` and Markdown is valid.
 
 -----
 
 ## How It Works
 
-  - **Backend (Python/Flask):** The `cli.py` script serves as the entry point. It parses commands and calls the appropriate functions. The `server.py` file runs a Flask web app that serves the frontend and acts as a controller for the AI agent.
+- **Backend (Python/Flask):** The `cli.py` script serves as the entry point. It parses commands and calls the appropriate functions. The `server.py` file runs a Flask web app that serves the frontend and acts as a controller for the AI agent.
 
-  - **AI Agent:** The server manages a stateful chat session for each user. It provides the Gemini model with a "toolbox" of Python functions (e.g., `get_list_of_all_reports`, `analyze_failure_trends`). The AI autonomously decides which tools to use to gather the necessary data before formulating its answer.
+- **AI Agent:** The server manages a stateful chat session for each user. It provides the Gemini model with a "toolbox" of Python functions (e.g., `get_list_of_all_reports`, `analyze_failure_trends`). The AI autonomously decides which tools to use to gather the necessary data before formulating its answer.
 
-  - **Frontend (HTML/JS):** The `report.html` file is a single-page application. The JavaScript in `static/main.js` fetches data from the backend, renders the failure groups, draws the charts using `Chart.js`, and manages the interactive chat with the AI analyst.
+- **Frontend (HTML/JS):** The `report.html` file is a single-page application. The JavaScript in `static/main.js` fetches data from the backend, renders the failure groups, draws the charts using `Chart.js`, and manages the interactive chat with the AI analyst.
 
 -----
 
 ## Using the AI Analyst
 
-The AI analyst is designed to understand natural language questions. Here are some examples:
+The AI analyst understands natural language. Example prompts:
 
-  - **Simple Comparisons:**
+- **Simple Comparisons:**
+  - "What is the difference between the last two reports?"
+  - "Compare the current run to the one from `2025-09-14 21:25:20`."
 
-      - "What is the difference between the last two reports?"
-      - "Compare the current run to the one from `2025-09-14 21:25:20`."
+- **Trend Analysis:**
+  - "Analyze failure trends for the last 30 days."
+  - "Is the 'Database connection timeout' failure getting better or worse over time?"
+  - "What are the most persistent errors over the last week?"
 
-  - **Trend Analysis:**
-
-      - "Analyze failure trends for the last 30 days."
-      - "Is the 'Database connection timeout' failure getting better or worse over time?"
-      - "What are the most persistent errors over the last week?"
-
-  - **Deep Dives:**
-
-      - "What was the most impacted epic in the latest run?"
-      - "Read the latest report and summarize the key issues for me."
-      - "Are there any new, high-frequency failures that appeared in the last 3 days?"
+- **Deep Dives:**
+  - "What was the most impacted epic in the latest run?"
+  - "Read the latest report and summarize the key issues for me."
+  - "Are there any new, high-frequency failures that appeared in the last 3 days?"
 
 -----
 

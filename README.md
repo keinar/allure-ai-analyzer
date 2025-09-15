@@ -2,223 +2,127 @@
 
 > An intelligent CLI tool that transforms raw Allure test results into an interactive dashboard featuring a powerful AI analyst. Get visual insights, proactive summaries, and ask complex questions about your test failures in natural language.
 
-![Project Screenshot](screenshot.png)
-
 ---
-## Table of Contents
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Installation & Setup](#installation--setup)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [How It Works](#how-it-works)
-- [Using the AI Analyst](#using-the-ai-analyst)
-- [License](#license)
 
----
 ## Features
 
-✨ **Interactive HTML Dashboard:** Clearly displays grouped failures with expandable details, including stack traces and examples.
+✨ **Interactive HTML Dashboard:** Displays grouped failures with expandable details, including stack traces and examples.  
 
-🤖 **Integrated AI Analyst (Powered by Gemini):**
-- **Conversational Memory:** Engage in a stateful conversation. The AI remembers the context of previous messages for follow-up questions.
-- **Autonomous Tool Use:** The AI agent proactively uses a toolbox of functions to access historical data, analyze trends, and answer complex questions.
-- **Natural Language Understanding:** Ask complex questions like "What's the difference between the last two reports?" or "What was the most common error this week?"
+🤖 **Integrated AI Analyst (Powered by Gemini):**  
+- Conversational memory for follow-up questions.  
+- Autonomous use of analysis tools (historical trends, bug frequency, etc.).  
+- Natural language queries: *“What’s the difference between the last two reports?”*  
 
-🚀 **Proactive Executive Summary:** On report load, the AI automatically analyzes the latest run and provides a summary of key insights directly in the chat. (This can be disabled in `config.yaml`).
+🚀 **Proactive Executive Summary:** Automatic summary of the latest run (configurable).  
 
-📊 **Visual Data Dashboard:**
-- Get immediate visual insights into your test data.
-- **Failures by Epic Chart:** A bar chart showing the total number of failures categorized by their associated 'epic' label.
-- **Status Breakdown Chart:** A doughnut chart visualizing the ratio of 'failed' vs. 'broken' tests.
+📊 **Visual Data Dashboard:** Failures by epic, status breakdown, trends.  
 
-📈 **Historical Trend Analysis:**
-- The AI can analyze the entire report history to identify patterns.
-- Ask about failure trends, the recurrence of specific bugs, and the impact of fixes over time.
+📈 **Historical Trend Analysis:** Identify patterns and track bug recurrence over time.  
 
 ---
-## Project Structure
-
-```text
-allure-analyzer/
-├── src/
-│   └── allure_analyzer/
-│       ├── __init__.py
-│       ├── cli.py
-│       ├── server.py
-│       ├── analyzer/
-│       │   ├── __init__.py
-│       │   ├── core.py
-│       │   ├── ingestion.py
-│       │   ├── fingerprinter.py
-│       │   └── reporting.py
-│       ├── static/
-│       │   ├── style.css
-│       │   └── main.js
-│       ├── templates/
-│       │   └── report.html
-│       └── config/
-│           └── default_config.yaml
-├── .env.example
-├── pyproject.toml
-├── README.md
-└── requirements.txt
-````
-
------
 
 ## Prerequisites
 
-  - **Python 3.11+**
-  - **pip** (Python package manager)
-  - An **Allure results** directory generated from a test run.
+- **Python 3.11+**
+- **pip**
+- An **Allure results** directory from your test runs.
 
------
+> macOS tip (Homebrew): `brew install python@3.11`
 
-## Installation & Setup
+---
 
-1.  **Clone the Repository (for development):**
+## Installation
 
-    ```bash
-    git clone <your-repository-url>
-    cd allure-analyzer
-    ```
+```bash
+pip install allure-ai-analyzer
+```
 
-2.  **Create and Activate a Virtual Environment:**
-    Ensure you are using Python 3.11 or newer.
+---
 
-    ```bash
-    python3.11 -m venv .venv
-    source .venv/bin/activate
-    ```
+## Quickstart
 
-    *For Windows, use `.venv\Scripts\activate`*
+1. **Create a virtual environment (recommended):**
+   ```bash
+   python3.11 -m venv .venv
+   source .venv/bin/activate
+   ```
 
-3.  **Install for Development:**
-    This command installs the package in "editable" mode.
+2. **Install the CLI:**
+   ```bash
+   pip install allure-ai-analyzer
+   ```
 
-    ```bash
-    pip install -e .
-    ```
+3. **Configure your API key:**  
+   Create a `.env` file in your automation project root:
+   ```bash
+   GEMINI_API_KEY="your-api-key-here"
+   ```
 
-    For final distribution, you will build and upload the package to PyPI.
+4. **Generate a report:**  
+   Run from the folder containing `allure-results`:
+   ```bash
+   allure-analyze generate
+   ```
 
-4.  **Set Up Your API Key:**
+5. **View the dashboard + AI analyst:**  
+   ```bash
+   allure-analyze view
+   ```
+   Default server: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
-      - Create a new file named `.env` in the project root where you will run the commands.
-      - Copy the content from `.env.example`.
-      - Replace the placeholder with your actual Gemini API key from Google AI Studio.
-
-    <!-- end list -->
-
-    ```
-    GEMINI_API_KEY="your-api-key-here"
-    ```
-
------
+---
 
 ## Configuration
 
-The tool comes with a default configuration. You can override it by creating a file named `allure-analyzer-config.yaml` in your automation project's root directory.
+Override defaults with `allure-analyzer-config.yaml` in your project root.
 
-The default settings are in `src/allure_analyzer/config/default_config.yaml`:
-
+Default config (`src/allure_analyzer/config/default_config.yaml`):
 ```yaml
-# Number of top failure groups to include in the report. -1 means all groups.
 top_n_groups_to_report: -1
-
-# By default, include tests with 'broken' status in the analysis.
 include_broken: true
-
-# --- UI Behavior ---
-# Set to true to automatically get an AI executive summary when the report loads.
 proactive_summary_on_load: true
 ```
 
-All of these can also be controlled via CLI flags.
+CLI flags:
+- `--path /path/to/results`
+- `--config /path/to/config.yaml`
+- `--top-n 10`
+- `--exclude-broken`
+- `--port 8001`
+- `--no-proactive-summary`
 
------
+---
 
-## Usage
+## Usage Examples
 
-Once installed, the `allure-analyze` command is available in your terminal.
+- **Generate a report**:
+  ```bash
+  allure-analyze generate --top-n 10
+  ```
+- **View the dashboard**:
+  ```bash
+  allure-analyze view --port 9000
+  ```
 
-**1. Generate a Report:**
-Navigate to your automation project's root directory (where `allure-results` is located) and run:
+---
 
-```bash
-allure-analyze generate
-```
+## Troubleshooting
 
-This will analyze the results and save the report data to a central folder in your user's home directory (`~/.allure-analyzer/`).
+- **Command not found:** Activate your venv and check `pip show allure-ai-analyzer`.  
+- **No matching distribution:** Ensure you’re on Python ≥3.11.  
+- **Assets not found:** Make sure you installed from PyPI, not a local copy missing `static/` or `templates/`.
 
-**Command Options:**
-
-  - `--path /path/to/results`: Specify a custom path to the `allure-results` directory.
-  - `--config /path/to/config.yaml`: Use a custom configuration file.
-  - `--top-n 10`: Only report the top 10 failure groups.
-  - `--exclude-broken`: Exclude 'broken' tests from the analysis.
-
-**2. View the Reports:**
-To launch the interactive dashboard and AI analyst, run:
-
-```bash
-allure-analyze view
-```
-
-**Command Options:**
-
-  - `--port 8001`: Run the server on a different port.
-  - `--no-proactive-summary`: Disable the automatic executive summary for this session.
-
-**Integration with Node.js Projects:**
-Since it's a CLI tool, you can easily add it to your `package.json` scripts:
-
-```json
-"scripts": {
-  "test": "playwright test",
-  "posttest": "allure-analyze generate",
-  "report": "allure-analyze view"
-}
-```
-
-Now you can run `npm test` and it will automatically generate the analysis report afterward.
-
------
-
-## How It Works
-
-  - **Backend (Python/Flask):** The `cli.py` script serves as the entry point. It parses commands and calls the appropriate functions. The `server.py` file runs a Flask web app that serves the frontend and acts as a controller for the AI agent.
-
-  - **AI Agent:** The server manages a stateful chat session for each user. It provides the Gemini model with a "toolbox" of Python functions (e.g., `get_list_of_all_reports`, `analyze_failure_trends`). The AI autonomously decides which tools to use to gather the necessary data before formulating its answer.
-
-  - **Frontend (HTML/JS):** The `report.html` file is a single-page application. The JavaScript in `static/main.js` fetches data from the backend, renders the failure groups, draws the charts using `Chart.js`, and manages the interactive chat with the AI analyst.
-
------
+---
 
 ## Using the AI Analyst
 
-The AI analyst is designed to understand natural language questions. Here are some examples:
+Example queries:
+- “What is the difference between the last two reports?”  
+- “Analyze failure trends for the last 30 days.”  
+- “What was the most impacted epic in the latest run?”  
+- “Summarize the key issues in the latest report.”  
 
-  - **Simple Comparisons:**
-
-      - "What is the difference between the last two reports?"
-      - "Compare the current run to the one from `2025-09-14 21:25:20`."
-
-  - **Trend Analysis:**
-
-      - "Analyze failure trends for the last 30 days."
-      - "Is the 'Database connection timeout' failure getting better or worse over time?"
-      - "What are the most persistent errors over the last week?"
-
-  - **Deep Dives:**
-
-      - "What was the most impacted epic in the latest run?"
-      - "Read the latest report and summarize the key issues for me."
-      - "Are there any new, high-frequency failures that appeared in the last 3 days?"
-
------
+---
 
 ## License
 

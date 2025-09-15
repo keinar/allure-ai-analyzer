@@ -9,3 +9,4 @@ __pycache__/
 dist/*
 dist
 src/pytest_rca_report.egg-info/
+.pypirc

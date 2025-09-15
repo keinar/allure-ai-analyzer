@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "allure-ai-analyzer"
-version = "1.0.4"
+version = "1.0.6"
 authors = [
   { name = "Keinar Elkayam", email = "info@digital-solution.co.il" },
 ]
@@ -30,12 +30,16 @@ allure-analyze = "allure_analyzer.cli:main"
 [project.urls]
 Homepage = "https://github.com/keinar/allure-ai-analyzer"
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.setuptools.packages.find]
+where = ["src"]
 include = ["allure_analyzer*"]
 
 [tool.setuptools.package-data]
 allure_analyzer = [
-    "config/*.yaml",
-    "templates/*.html",
-    "static/*"
+  "config/*.yaml",
+  "templates/*.html",
+  "static/*"
 ]
