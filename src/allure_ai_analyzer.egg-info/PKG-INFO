@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: allure-ai-analyzer
-Version: 1.0.6
+Version: 1.0.8
 Summary: An intelligent CLI tool that transforms raw Allure test results into an interactive dashboard with an AI analyst.
 Author-email: Keinar Elkayam <info@digital-solution.co.il>
 Project-URL: Homepage, https://github.com/keinar/allure-ai-analyzer
@@ -20,299 +20,131 @@ Dynamic: license-file
 
 > An intelligent CLI tool that transforms raw Allure test results into an interactive dashboard featuring a powerful AI analyst. Get visual insights, proactive summaries, and ask complex questions about your test failures in natural language.
 
-![Project Screenshot](screenshot.png)
-
 ---
-## Table of Contents
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Quickstart](#quickstart)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Troubleshooting](#troubleshooting)
-- [Local Development](#local-development)
-- [Publishing (Maintainers)](#publishing-maintainers)
-- [How It Works](#how-it-works)
-- [Using the AI Analyst](#using-the-ai-analyst)
-- [License](#license)
 
----
+<p align="center">
+  <img src="https://raw.githubusercontent.com/keinar/allure-ai-analyzer/main/screenshot.png" width="900" alt="screenshot">
+</p>
+
 ## Features
 
-✨ **Interactive HTML Dashboard:** Clearly displays grouped failures with expandable details, including stack traces and examples.
+✨ **Interactive HTML Dashboard:** Displays grouped failures with expandable details, including stack traces and examples.  
 
-🤖 **Integrated AI Analyst (Powered by Gemini):**
-- **Conversational Memory:** Engage in a stateful conversation. The AI remembers the context of previous messages for follow-up questions.
-- **Autonomous Tool Use:** The AI agent proactively uses a toolbox of functions to access historical data, analyze trends, and answer complex questions.
-- **Natural Language Understanding:** Ask complex questions like "What's the difference between the last two reports?" or "What was the most common error this week?"
+🤖 **Integrated AI Analyst (Powered by Gemini):**  
+- Conversational memory for follow-up questions.  
+- Autonomous use of analysis tools (historical trends, bug frequency, etc.).  
+- Natural language queries: *“What’s the difference between the last two reports?”*  
 
-🚀 **Proactive Executive Summary:** On report load, the AI automatically analyzes the latest run and provides a summary of key insights directly in the chat. (This can be disabled in `config.yaml`).
+🚀 **Proactive Executive Summary:** Automatic summary of the latest run (configurable).  
 
-📊 **Visual Data Dashboard:**
-- Get immediate visual insights into your test data.
-- **Failures by Epic Chart:** A bar chart showing the total number of failures categorized by their associated 'epic' label.
-- **Status Breakdown Chart:** A doughnut chart visualizing the ratio of 'failed' vs. 'broken' tests.
+📊 **Visual Data Dashboard:** Failures by epic, status breakdown, trends.  
 
-📈 **Historical Trend Analysis:**
-- The AI can analyze the entire report history to identify patterns.
-- Ask about failure trends, the recurrence of specific bugs, and the impact of fixes over time.
+📈 **Historical Trend Analysis:** Identify patterns and track bug recurrence over time.  
 
 ---
-## Project Structure
-
-```text
-allure-analyzer/
-├── src/
-│   └── allure_analyzer/
-│       ├── __init__.py
-│       ├── cli.py
-│       ├── server.py
-│       ├── analyzer/
-│       │   ├── __init__.py
-│       │   ├── core.py
-│       │   ├── ingestion.py
-│       │   ├── fingerprinter.py
-│       │   └── reporting.py
-│       ├── static/
-│       │   ├── style.css
-│       │   └── main.js
-│       ├── templates/
-│       │   └── report.html
-│       └── config/
-│           └── default_config.yaml
-├── .env.example
-├── pyproject.toml
-├── README.md
-└── requirements.txt
-```
-
-> If you ship package data (templates, static assets, YAML config), make sure they live **under** `src/allure_analyzer/...` so they are included in wheels.
-
------
 
 ## Prerequisites
 
-- **Python 3.11+** (the package requires `>=3.11`)
-- **pip** (Python package manager)
-- An **Allure results** directory generated from a test run.
+- **Python 3.11+**
+- **pip**
+- An **Allure results** directory from your test runs.
 
 > macOS tip (Homebrew): `brew install python@3.11`
 
------
+---
 
 ## Installation
 
-### Stable (PyPI)
-Once released to PyPI (production), installation is simply:
 ```bash
 pip install allure-ai-analyzer
 ```
 
-### Preview / Testing (TestPyPI)
-When installing from **TestPyPI**, use PyPI as a **fallback for dependencies** (so wheels like `PyYAML>=6.0` are available):
-```bash
-pip install --index-url https://test.pypi.org/simple/ \
-  --extra-index-url https://pypi.org/simple \
-  allure-ai-analyzer
-```
-
-> Why the extra index? TestPyPI often doesn’t host all dependency wheels. The extra index lets pip fetch deps from PyPI while your package still comes from TestPyPI.
-
------
+---
 
 ## Quickstart
 
-1) **Set up a virtual environment (recommended):**
-```bash
-python3.11 -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-```
+1. **Create a virtual environment (recommended):**
+   ```bash
+   python3.11 -m venv .venv
+   source .venv/bin/activate
+   ```
 
-2) **Install the CLI:**
-```bash
-pip install allure-ai-analyzer
-# or, from TestPyPI with fallback:
-# pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple allure-ai-analyzer
-```
+2. **Install the CLI:**
+   ```bash
+   pip install allure-ai-analyzer
+   ```
 
-3) **Provide your API key:**
-Create a `.env` file in your **automation project root** (where you run the CLI) and add:
-```bash
-GEMINI_API_KEY="your-api-key-here"
-```
+3. **Configure your API key:**  
+   Create a `.env` file in your automation project root:
+   ```bash
+   GEMINI_API_KEY="your-api-key-here"
+   ```
 
-4) **Generate a report:**
-From your automation project (where `allure-results` exists):
-```bash
-allure-analyze generate
-```
+4. **Generate a report:**  
+   Run from the folder containing `allure-results`:
+   ```bash
+   allure-analyze generate
+   ```
 
-5) **View the interactive dashboard + AI analyst:**
-```bash
-allure-analyze view
-```
-By default the server binds to `http://127.0.0.1:8000` (or the port you pass via `--port`).
+5. **View the dashboard + AI analyst:**  
+   ```bash
+   allure-analyze view
+   ```
+   Default server: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
------
+---
 
 ## Configuration
 
-You can override defaults by creating `allure-analyzer-config.yaml` in your **automation project root** (next to your `allure-results`).
+Override defaults with `allure-analyzer-config.yaml` in your project root.
 
-The default settings live at `src/allure_analyzer/config/default_config.yaml`:
-
+Default config (`src/allure_analyzer/config/default_config.yaml`):
 ```yaml
-# Number of top failure groups to include in the report. -1 means all groups.
 top_n_groups_to_report: -1
-
-# Include tests with 'broken' status in the analysis.
 include_broken: true
-
-# --- UI Behavior ---
-# Set to true to automatically get an AI executive summary when the report loads.
 proactive_summary_on_load: true
 ```
 
-Most options can also be controlled via CLI flags (see below).
+CLI flags:
+- `--path /path/to/results`
+- `--config /path/to/config.yaml`
+- `--top-n 10`
+- `--exclude-broken`
+- `--port 8001`
+- `--no-proactive-summary`
 
------
+---
 
-## Usage
+## Usage Examples
 
-Once installed, the `allure-analyze` command is available in your terminal.
+- **Generate a report**:
+  ```bash
+  allure-analyze generate --top-n 10
+  ```
+- **View the dashboard**:
+  ```bash
+  allure-analyze view --port 9000
+  ```
 
-### 1) Generate a Report
-Run from your automation project's root (where `allure-results` is located):
-```bash
-allure-analyze generate
-```
-
-**Useful flags:**
-- `--path /path/to/results` — explicit path to `allure-results`
-- `--config /path/to/config.yaml` — use a custom config
-- `--top-n 10` — only report the top 10 failure groups
-- `--exclude-broken` — exclude 'broken' tests from analysis
-
-### 2) View Reports (Dashboard + AI)
-```bash
-allure-analyze view
-```
-**Useful flags:**
-- `--port 8001` — run the server on a different port
-- `--no-proactive-summary` — disable the automatic executive summary
-
-### Integration with Node.js Projects
-Because this is a CLI, you can wire it into `package.json`:
-```json
-{
-  "scripts": {
-    "test": "playwright test",
-    "posttest": "allure-analyze generate",
-    "report": "allure-analyze view"
-  }
-}
-```
-
------
+---
 
 ## Troubleshooting
 
-- **`zsh: command not found: allure-analyze`**
-  - Ensure the venv is **activated** and installation succeeded: `pip show allure-ai-analyzer`.
-  - On Windows PowerShell, activate via: `.venv\Scripts\Activate.ps1`.
+- **Command not found:** Activate your venv and check `pip show allure-ai-analyzer`.  
+- **No matching distribution:** Ensure you’re on Python ≥3.11.  
+- **Assets not found:** Make sure you installed from PyPI, not a local copy missing `static/` or `templates/`.
 
-- **`ERROR: No matching distribution found`**
-  - Check Python version: `python -V` must be **3.11+**.
-  - If installing from **TestPyPI**, add the fallback index:  
-    `--extra-index-url https://pypi.org/simple`.
-
-- **Build isolation failures like `setuptools>=40.8.0` when installing from TestPyPI**
-  - Use the recommended TestPyPI install command above so dependencies come from PyPI.
-  - Alternatively, preinstall critical deps: `pip install PyYAML>=6.0`.
-
-- **Assets not found (templates/static/config)**
-  - Ensure they live under `src/allure_analyzer/...` and are included via `package-data`.
-
------
-
-## Local Development
-
-1) Clone and enter the repo:
-```bash
-git clone <your-repository-url>
-cd allure-analyzer
-```
-
-2) Create & activate a venv:
-```bash
-python3.11 -m venv .venv
-source .venv/bin/activate
-```
-
-3) Install in editable mode:
-```bash
-pip install -e .
-```
-
-4) Set your `.env` (see Quickstart), then run:
-```bash
-allure-analyze generate
-allure-analyze view
-```
-
------
-
-## Publishing (Maintainers)
-
-> Use [TestPyPI](https://test.pypi.org) for dry runs and **PyPI** for production.
-
-```bash
-# Clean, build, and upload
-rm -rf dist build *.egg-info
-python -m pip install -U pip build twine
-python -m build
-python -m twine upload --repository testpypi dist/*
-# For PyPI production:
-# python -m twine upload dist/*
-```
-
-**Common upload issues**
-- *"File already exists"*: bump the version in `pyproject.toml`.
-- README rendering warnings: ensure `readme = "README.md"` and Markdown is valid.
-
------
-
-## How It Works
-
-- **Backend (Python/Flask):** The `cli.py` script serves as the entry point. It parses commands and calls the appropriate functions. The `server.py` file runs a Flask web app that serves the frontend and acts as a controller for the AI agent.
-
-- **AI Agent:** The server manages a stateful chat session for each user. It provides the Gemini model with a "toolbox" of Python functions (e.g., `get_list_of_all_reports`, `analyze_failure_trends`). The AI autonomously decides which tools to use to gather the necessary data before formulating its answer.
-
-- **Frontend (HTML/JS):** The `report.html` file is a single-page application. The JavaScript in `static/main.js` fetches data from the backend, renders the failure groups, draws the charts using `Chart.js`, and manages the interactive chat with the AI analyst.
-
------
+---
 
 ## Using the AI Analyst
 
-The AI analyst understands natural language. Example prompts:
+Example queries:
+- “What is the difference between the last two reports?”  
+- “Analyze failure trends for the last 30 days.”  
+- “What was the most impacted epic in the latest run?”  
+- “Summarize the key issues in the latest report.”  
 
-- **Simple Comparisons:**
-  - "What is the difference between the last two reports?"
-  - "Compare the current run to the one from `2025-09-14 21:25:20`."
-
-- **Trend Analysis:**
-  - "Analyze failure trends for the last 30 days."
-  - "Is the 'Database connection timeout' failure getting better or worse over time?"
-  - "What are the most persistent errors over the last week?"
-
-- **Deep Dives:**
-  - "What was the most impacted epic in the latest run?"
-  - "Read the latest report and summarize the key issues for me."
-  - "Are there any new, high-frequency failures that appeared in the last 3 days?"
-
------
+---
 
 ## License
 

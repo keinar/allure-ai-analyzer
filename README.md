@@ -4,6 +4,10 @@
 
 ---
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/keinar/allure-ai-analyzer/main/screenshot.png" width="900" alt="screenshot">
+</p>
+
 ## Features
 
 ✨ **Interactive HTML Dashboard:** Displays grouped failures with expandable details, including stack traces and examples.  
