@@ -1,0 +1,16 @@
+# Default configuration for the Allure AI Analyzer.
+# Users can override these settings by creating an 'allure-analyzer-config.yaml'
+# file in their own project's root directory, or by using CLI flags.
+
+# Number of top failure groups to include in the report. 
+# Set to -1 to include all groups. Can be overridden with --top-n flag.
+top_n_groups_to_report: -1
+
+# By default, include tests with 'broken' status in the analysis.
+# Can be overridden with the --exclude-broken flag.
+include_broken: true
+
+# --- UI Behavior ---
+# Set to true to automatically get an AI executive summary when the report loads.
+# Can be overridden with the --no-proactive-summary flag.
+proactive_summary_on_load: true

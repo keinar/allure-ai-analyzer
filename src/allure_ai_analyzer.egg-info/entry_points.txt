@@ -1,0 +1,2 @@
+[console_scripts]
+allure-analyze = allure_analyzer.cli:main

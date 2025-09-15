@@ -1,0 +1,7 @@
+# For local development setup
+# The final dependencies are managed by pyproject.toml
+-e .
+PyYAML
+Flask
+python-dotenv
+google-genai

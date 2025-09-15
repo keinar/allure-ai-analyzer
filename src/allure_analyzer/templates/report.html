@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allure AI Failure Analyzer</title>
+    
+    <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="/static/style.css">
+    
+    <!-- Favicon links (assuming they are in static folder) -->
+    <link rel="icon" type="image/x-icon" href="/static/favicon.png">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    
+    <!-- Include Libraries for Markdown and Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<!-- The server passes the config value here -->
+<body data-proactive-summary="{{ proactive_summary_enabled }}">
+    
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Allure Failure Analysis</h1>
+                <div class="header-meta">
+                    <span>Generated on: <span id="meta-date">...</span></span> |
+                    <span>Total Failures: <span id="meta-total">...</span></span> |
+                    <span>Unique Groups: <span id="meta-groups">...</span></span>
+                </div>
+            </div>
+            <div class="controls">
+                <label for="report-selector">Select Report:</label>
+                <select id="report-selector"></select>
+                <input type="text" id="search-box" placeholder="Filter groups...">
+                <button id="dark-mode-toggle" title="Toggle Dark Mode">🌓</button>
+            </div>
+        </div>
+        
+        <!-- Dashboard Container for Charts -->
+        <div id="dashboard-container">
+            <div class="chart-card">
+                <h3>Failures by Epic</h3>
+                <canvas id="failuresByEpicChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Failures by Status</h3>
+                <canvas id="statusBreakdownChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Container for the failure group cards -->
+        <div id="groups-container">
+            <div id="loader">Loading reports list...</div>
+        </div>
+    </div>
+    
+    <!-- AI Chat Component -->
+    <div id="ai-chat-container">
+        <div id="chat-header">
+            <h3>🤖 AI Report Analyst</h3>
+        </div>
+        <div id="chat-messages">
+            <!-- Initial message is now set by main.js -->
+        </div>
+        <form id="chat-input-form">
+            <textarea id="chat-input" placeholder="Ask about the report... (Shift+Enter for new line)" rows="1"></textarea>
+            <button id="chat-send-btn" type="submit">Send</button>
+        </form>
+    </div>
+
+    <!-- Link to the external JavaScript file -->
+    <script src="/static/main.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+PyYAML
+Flask
+python-dotenv
+google-genai

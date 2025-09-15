@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "allure-ai-analyzer"
+version = "1.0.4"
+authors = [
+  { name = "Keinar Elkayam", email = "info@digital-solution.co.il" },
+]
+description = "An intelligent CLI tool that transforms raw Allure test results into an interactive dashboard with an AI analyst."
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "PyYAML>=6.0",
+    "Flask>=3.0",
+    "python-dotenv>=1.0",
+    "google-genai>=0.3"
+]
+
+[project.scripts]
+allure-analyze = "allure_analyzer.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/keinar/allure-analyzer-library"
+
+[tool.setuptools.packages.find]
+include = ["allure_analyzer*"]
+
+[tool.setuptools.package-data]
+allure_analyzer = [
+    "config/*.yaml",
+    "templates/*.html",
+    "static/*"
+]

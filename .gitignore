@@ -1,0 +1,11 @@
+data/results.json
+.env
+__pycache__/
+*.pyc
+.DS_Store
+*.log
+.venv/
+.idea/
+dist/*
+dist
+src/pytest_rca_report.egg-info/
