@@ -28,7 +28,7 @@ dependencies = [
 allure-analyze = "allure_analyzer.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/keinar/allure-analyzer-library"
+Homepage = "https://github.com/keinar/allure-ai-analyzer"
 
 [tool.setuptools.packages.find]
 include = ["allure_analyzer*"]

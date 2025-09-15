@@ -3,7 +3,7 @@ Name: allure-ai-analyzer
 Version: 1.0.3
 Summary: An intelligent CLI tool that transforms raw Allure test results into an interactive dashboard with an AI analyst.
 Author-email: Keinar Elkayam <info@digital-solution.co.il>
-Project-URL: Homepage, https://github.com/keinar/allure-analyzer-library
+Project-URL: Homepage, https://github.com/keinar/allure-ai-analyzer
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
